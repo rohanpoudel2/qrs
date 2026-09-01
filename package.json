@@ -1,0 +1,53 @@
+{
+  "name": "@rohanpoudel2/qrs",
+  "version": "0.0.0",
+  "description": "Generate and verify QR codes from code, the terminal, CI, or an agent.",
+  "type": "module",
+  "license": "MIT",
+  "sideEffects": false,
+  "engines": {
+    "node": ">=20.19.0"
+  },
+  "files": [
+    "dist",
+    "LICENSE",
+    "README.md",
+    "ROADMAP.md"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "bin": {
+    "qrs": "./dist/cli.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit",
+    "test": "npm run build && node --test test/*.test.mjs",
+    "prepack": "npm test"
+  },
+  "dependencies": {
+    "qr": "^0.7.0"
+  },
+  "devDependencies": {
+    "@types/node": "^26.4.0",
+    "typescript": "^7.0.2"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rohanpoudel2/qrs.git"
+  },
+  "keywords": [
+    "qr",
+    "qrcode",
+    "cli",
+    "agent",
+    "ci",
+    "svg"
+  ]
+}
+
