@@ -14,6 +14,7 @@ Generate, audit, and independently stress-test QR codes from code, the terminal,
 
 - Safe defaults: error correction `M` and a four-module quiet zone
 - Text and real `Uint8Array` input
+- O(n) optimal numeric/alphanumeric/byte segmentation when it reduces symbol size
 - DOM-free accessible SVG, one-pass 1-bit PNG, terminal, and raw matrix output
 - Stable, actionable JSON audit reports
 - Screen and print profiles covering resize, blur, JPEG compression, and low contrast
@@ -35,6 +36,8 @@ const scan = await scanPNG(png, { profile: 'screen', expected: 'https://example.
 
 if (!report.ok || !scan.ok)
   process.exitCode = 2
+
+console.log(code.segments, code.savedBits)
 ```
 
 The project and executable are named `qrs`. The npm identifier is scoped because the unrelated
@@ -48,6 +51,9 @@ qrs generate 'https://example.com' --output code.svg
 
 # Generate the PNG and run the real screen profile before returning
 qrs generate 'https://example.com' --format png --output code.png --check
+
+# Force the shortest bitstream even when it does not reduce the QR version
+qrs generate 'https://example.com/order/123456789' --optimize bits --json
 
 # Pipe input and receive structured output
 echo 'https://example.com' | qrs generate --stdin --json
@@ -107,6 +113,16 @@ Batch manifests are JSONL, with paths resolved relative to the manifest:
 Batch output is JSONL in the same order. The WASM reader is initialized once and reused for every
 record, which avoids per-artifact cold-start cost.
 
+## Encoding optimization
+
+The default `size` strategy runs the segment planner only when a conservative lower bound shows that
+mixed encoding can reduce the QR version. This preserves the original fast path for payloads that
+cannot become smaller. Use `{ optimize: 'bits' }` or `--optimize bits` to request the shortest
+bitstream regardless of version; use `false` or `--optimize off` to disable segmentation.
+
+Each result exposes `segments`, `dataBits`, and `savedBits`. The planner is an O(n) six-state shortest
+path across numeric, alphanumeric, and UTF-8 byte modes.
+
 ## Performance
 
 Performance is a product contract. `npm run benchmark` measures the current machine, while CI uses
@@ -117,6 +133,7 @@ Current local baseline for a 296×296 QR:
 | Operation | Time |
 |---|---:|
 | `createQR` | ~0.04 ms |
+| Optimized mixed encode | ~0.10 ms |
 | 1-bit `renderPNG` | ~0.04 ms |
 | Full screen profile, cold | ~35 ms |
 | Full screen profile, warm | ~20–25 ms |

@@ -43,11 +43,11 @@ using a reader independent from the encoder.
 ### M2 — generator parity and safe styling
 
 - [ ] Blob, data URL, and Canvas output
-- [ ] Optimal mixed numeric/alphanumeric/byte segmentation
+- [x] Optimal mixed numeric/alphanumeric/byte segmentation
 - [ ] ECI and Kanji encoding
 - [ ] Wi-Fi, vCard, email, SMS, geo, and event payload builders
 - [ ] `uqr` compatibility entry point and migration fixtures
-- [ ] Reproducible size and speed benchmarks
+- [x] Reproducible size and speed benchmarks
 - [ ] Rounded/dot modules and independently styled finder patterns
 - [ ] Gradients with contrast analysis
 - [ ] Embedded logos that cannot overwrite finder/timing/alignment patterns
