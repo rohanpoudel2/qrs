@@ -29,14 +29,15 @@ framework wrappers do not belong here until real consumers need them.
 
 ### M1 — first real scan contract
 
-- [ ] Pure PNG output so the public raster artifact can be tested directly
-- [ ] Independent decoder in an opt-in entry point
-- [ ] Deterministic resize, blur, compression, and contrast sweeps
-- [ ] Screen and print profiles
-- [ ] Per-artifact result that distinguishes static checks from real decodes
-- [ ] `qrs check <artifact>` and JSONL batch mode
+- [x] Pure PNG output so the public raster artifact can be tested directly
+- [x] Independent decoder in an opt-in entry point
+- [x] Deterministic resize, blur, compression, and contrast sweeps
+- [x] Screen and print profiles
+- [x] Per-artifact result that distinguishes static checks from real decodes
+- [x] `qrs check <artifact>`
+- [x] JSONL batch mode
 
-Exit gate: the CLI can prove that the exact SVG or PNG it produced survives a reproducible profile
+Exit gate: the CLI can prove that the exact PNG it produced survives a reproducible profile
 using a reader independent from the encoder.
 
 ### M2 — generator parity and safe styling

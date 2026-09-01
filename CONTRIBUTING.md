@@ -37,6 +37,9 @@ The portable library lives in `src/index.ts`; the Node-specific CLI is a thin ad
 Keep pull requests focused. Unrelated cleanup makes review and rollback harder. New runtime
 dependencies need a concrete bundle-size, security, or correctness justification.
 
+Performance-sensitive changes should also run `npm run benchmark`. Include before/after numbers in
+the pull request, but do not tune production behavior for one machine or one payload.
+
 ## Project contracts
 
 - Generation is local-first and deterministic.
@@ -44,4 +47,3 @@ dependencies need a concrete bundle-size, security, or correctness justification
 - JSON output is stable, versioned, and contains no unstructured logs.
 - Static heuristics must never be described as real scanner results.
 - Independent readers—not the encoder itself—are the correctness oracle.
-
