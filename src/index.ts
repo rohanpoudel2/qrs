@@ -1,5 +1,6 @@
 import encodeQR from 'qr'
 import type { QrOpts } from 'qr'
+import { parseHexColor } from './color.js'
 
 export type ErrorCorrectionLevel = 'L' | 'M' | 'Q' | 'H'
 export type QRData = string | Uint8Array
@@ -159,16 +160,6 @@ export function createQR(data: QRData, options: QROptions = {}): QRCode {
   }
 }
 
-function color(value: string, name: string): [number, number, number] {
-  if (!/^#[\da-f]{3}(?:[\da-f]{3})?$/i.test(value))
-    throw new TypeError(`${name} must be a three- or six-digit hex color`)
-
-  const hex = value.length === 4
-    ? [...value.slice(1)].map(char => char + char).join('')
-    : value.slice(1)
-  return [0, 2, 4].map(offset => Number.parseInt(hex.slice(offset, offset + 2), 16)) as [number, number, number]
-}
-
 function luminance(rgb: [number, number, number]): number {
   const [r, g, b] = rgb.map((channel) => {
     const value = channel / 255
@@ -185,8 +176,8 @@ export function auditQR(code: QRCode, options: AuditOptions = {}): AuditReport {
 
   const dark = options.dark ?? '#000000'
   const light = options.light ?? '#ffffff'
-  const darkLuminance = luminance(color(dark, 'dark'))
-  const lightLuminance = luminance(color(light, 'light'))
+  const darkLuminance = luminance(parseHexColor(dark, 'dark'))
+  const lightLuminance = luminance(parseHexColor(light, 'light'))
   const contrastRatio = (Math.max(darkLuminance, lightLuminance) + 0.05)
     / (Math.min(darkLuminance, lightLuminance) + 0.05)
   const modulePixels = targetSize / code.size
@@ -304,8 +295,8 @@ export function renderSVG(code: QRCode, options: SVGOptions = {}): string {
   const size = integer('size', options.size ?? code.size * 8, 1, 16384)
   const dark = options.dark ?? '#000000'
   const light = options.light ?? '#ffffff'
-  color(dark, 'dark')
-  color(light, 'light')
+  parseHexColor(dark, 'dark')
+  parseHexColor(light, 'light')
   const title = options.title ?? 'QR code'
 
   let path = ''
@@ -341,7 +332,10 @@ export function renderTerminal(code: QRCode): string {
 export const capabilities = {
   schemaVersion: 1,
   inputs: ['text', 'bytes', 'stdin'] as const,
-  outputs: ['svg', 'terminal', 'matrix'] as const,
+  outputs: ['svg', 'png', 'terminal', 'matrix'] as const,
   audits: ['quiet-zone', 'error-correction', 'module-size', 'contrast'] as const,
+  scannerInputs: ['png'] as const,
+  scanProfiles: ['screen', 'print'] as const,
+  scannerRuntimes: ['node'] as const,
   runtimes: ['browser', 'node', 'bun', 'deno', 'worker'] as const,
 }
