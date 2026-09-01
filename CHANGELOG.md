@@ -15,5 +15,4 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Non-interactive, JSON-capable CLI
 - Project governance, contribution, and security documentation
 
-[Unreleased]: https://github.com/rohanpoudel2/qrs/compare/v0.1.0...HEAD
-
+[Unreleased]: https://github.com/rohanpoudel2/qrs/commits/main
