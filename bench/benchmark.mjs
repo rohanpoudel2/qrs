@@ -2,6 +2,7 @@ import { performance } from 'node:perf_hooks'
 import { createQR } from '../dist/index.js'
 import { renderPNG } from '../dist/png.js'
 import { scanPNG } from '../dist/scan.js'
+import { frameAt } from '../dist/rotate.js'
 
 function measure(iterations, operation) {
   for (let i = 0; i < Math.min(iterations, 25); i++) operation()
@@ -35,6 +36,10 @@ const cold = await scanPNG(png, { expected: medium.payload, timings: true })
 const warm = await scanPNG(png, { expected: medium.payload, timings: true })
 rows.push({ operation: 'scan screen (cold)', milliseconds: cold.durationMs })
 rows.push({ operation: 'scan screen (warm)', milliseconds: warm.durationMs })
+const frameStarted = performance.now()
+for (let i = 0; i < 2_000; i++)
+  await frameAt({ token: () => medium.payload, output: 'png' }, 60_000)
+rows.push({ operation: 'rotating PNG frame', milliseconds: (performance.now() - frameStarted) / 2_000 })
 
 console.table(rows)
 console.log(`PNG bytes: ${png.length}`)

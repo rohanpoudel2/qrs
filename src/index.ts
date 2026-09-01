@@ -399,5 +399,6 @@ export const capabilities = {
   scannerRuntimes: ['node'] as const,
   encodingModes: ['numeric', 'alphanumeric', 'byte'] as const,
   optimization: ['size', 'bits', 'off'] as const,
+  rotatingOutputs: ['svg', 'png'] as const,
   runtimes: ['browser', 'node', 'bun', 'deno', 'worker'] as const,
 }

@@ -30,6 +30,10 @@
       "types": "./dist/scan.d.ts",
       "import": "./dist/scan.js"
     },
+    "./rotate": {
+      "types": "./dist/rotate.d.ts",
+      "import": "./dist/rotate.js"
+    },
     "./package.json": "./package.json"
   },
   "bin": {
@@ -77,6 +81,8 @@
     "png",
     "scanner",
     "performance",
-    "webassembly"
+    "webassembly",
+    "rotating-qr",
+    "membership"
   ]
 }
