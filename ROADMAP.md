@@ -48,6 +48,7 @@ using a reader independent from the encoder.
 - [ ] Wi-Fi, vCard, email, SMS, geo, and event payload builders
 - [ ] `uqr` compatibility entry point and migration fixtures
 - [x] Reproducible size and speed benchmarks
+- [x] Drift-free server-token rotation primitive for membership displays
 - [ ] Rounded/dot modules and independently styled finder patterns
 - [ ] Gradients with contrast analysis
 - [ ] Embedded logos that cannot overwrite finder/timing/alignment patterns
@@ -63,6 +64,7 @@ require a larger symbol than `qrcode`, and styled public artifacts pass the scan
 - [ ] Crop, obstruction, and perspective sweeps
 - [ ] Per-artifact score with the weakest passing/failing condition
 - [ ] Repository glob support and CI annotations
+- [ ] Compact signed rotating credential and replay-aware verifier
 
 Exit gate: results are reproducible across supported runtimes and never describe a static heuristic
 as a real scan result.

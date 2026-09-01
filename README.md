@@ -26,6 +26,7 @@ Generate, audit, and independently stress-test QR codes from code, the terminal,
 ```ts
 import { auditQR, createQR, renderSVG } from '@rohanpoudel2/qrs'
 import { renderPNG } from '@rohanpoudel2/qrs/png'
+import { rotateQR } from '@rohanpoudel2/qrs/rotate'
 import { scanPNG } from '@rohanpoudel2/qrs/scan'
 
 const code = createQR('https://example.com')
@@ -135,10 +136,44 @@ Current local baseline for a 296×296 QR:
 | `createQR` | ~0.04 ms |
 | Optimized mixed encode | ~0.10 ms |
 | 1-bit `renderPNG` | ~0.04 ms |
+| Rotating PNG frame, excluding token fetch | ~0.08 ms |
 | Full screen profile, cold | ~35 ms |
 | Full screen profile, warm | ~20–25 ms |
 
 See the [product roadmap](./ROADMAP.md) for the remaining scan and styling work.
+
+## Rotating membership QRs
+
+`qrs/rotate` handles display rotation while your server remains the credential issuer:
+
+```ts
+import { rotateQR } from '@rohanpoudel2/qrs/rotate'
+
+for await (const frame of rotateQR({
+  period: 30_000,
+  output: 'png',
+  signal: controller.signal,
+  token: async ({ step, validFrom, expiresAt, signal }) => {
+    const response = await fetch('/api/membership/pass', {
+      signal,
+      headers: { 'x-rotation-step': String(step) },
+    })
+    return response.text() // A short-lived token signed by the server.
+  },
+})) {
+  image.src = URL.createObjectURL(new Blob([frame.artifact], { type: 'image/png' }))
+}
+```
+
+The iterator schedules against exact boundaries instead of accumulating `setInterval` drift. It
+discards tokens that arrive after their window, handles clock rollback without repeating a step,
+and stops cleanly through `AbortSignal`. `frameAt()` and `rotationWindow()` provide deterministic
+one-frame and time-window primitives for server rendering and tests.
+
+The member application must not contain the signing key. Rotation and expiry limit screenshot
+lifetime, but strict replay prevention still requires the verifier/backend to consume a unique token
+ID. Signed-token issuance and verification remain tracked in
+[security issue #8](https://github.com/rohanpoudel2/qrs/issues/8).
 
 ## Development
 

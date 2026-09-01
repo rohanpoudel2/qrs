@@ -19,6 +19,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Resize, blur, JPEG compression, and contrast stress cases
 - Opt-in millisecond timings and performance regression guardrails
 - Differential version testing against `qrcode` across all error-correction levels
+- Drift-free rotating SVG/PNG frames backed by an application token provider
+- Rotation-window, clock-rollback, stale-token, and cancellation handling
 - Non-interactive, JSON-capable CLI
 - Project governance, contribution, and security documentation
 
