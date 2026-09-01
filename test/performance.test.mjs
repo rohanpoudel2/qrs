@@ -17,6 +17,12 @@ test('performance guardrails catch algorithmic regressions', async () => {
   const averagePNG = (performance.now() - started) / iterations
   assert.ok(averagePNG < 2, `PNG rendering regressed to ${averagePNG.toFixed(3)} ms/op`)
 
+  const mixed = `abc${'1'.repeat(40)}`
+  const mixedStarted = performance.now()
+  for (let i = 0; i < iterations; i++) createQR(mixed)
+  const averageMixed = (performance.now() - mixedStarted) / iterations
+  assert.ok(averageMixed < 1, `mixed segmentation regressed to ${averageMixed.toFixed(3)} ms/op`)
+
   await scanPNG(png, { expected: payload })
   const warm = await scanPNG(png, { expected: payload, timings: true })
   // Shared CI runners are much noisier than local hardware; this is a 10x-class regression tripwire.

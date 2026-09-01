@@ -10,12 +10,15 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### Added
 
 - Universal QR API for text and byte input
+- O(n) optimal numeric/alphanumeric/byte segmentation with size and bitstream strategies
+- Segment metadata and saved-bit reporting
 - Accessible SVG, terminal, and raw matrix output
 - Fast, deterministic 1-bit indexed PNG output
 - Static scan-safety audit with stable issue codes
 - Independent `scan-v1` screen and print profiles
 - Resize, blur, JPEG compression, and contrast stress cases
 - Opt-in millisecond timings and performance regression guardrails
+- Differential version testing against `qrcode` across all error-correction levels
 - Non-interactive, JSON-capable CLI
 - Project governance, contribution, and security documentation
 

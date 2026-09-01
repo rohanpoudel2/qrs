@@ -30,6 +30,7 @@ Options:
   --border <modules>   Quiet zone modules (default: 4)
   --version <number>   Force QR version 1-40
   --mask <number>      Force mask 0-7
+  --optimize <mode>    size, bits, or off (default: size)
   --size <pixels>      Intended output size
   --dark <hex>         Dark color (default: #000000)
   --light <hex>        Light color (default: #ffffff)
@@ -56,6 +57,7 @@ function parseCLI() {
       border: { type: 'string', default: '4' },
       version: { type: 'string' },
       mask: { type: 'string' },
+      optimize: { type: 'string', default: 'size' },
       size: { type: 'string' },
       dark: { type: 'string', default: '#000000' },
       light: { type: 'string', default: '#ffffff' },
@@ -224,6 +226,7 @@ async function main(): Promise<void> {
     border: numberOption('border', values.border),
     version: numberOption('version', values.version),
     mask: numberOption('mask', values.mask),
+    optimize: values.optimize === 'off' ? false : values.optimize as 'size' | 'bits',
   })
   const size = numberOption('size', values.size)
   const audit = auditQR(code, { size, dark: values.dark, light: values.light })
@@ -287,6 +290,9 @@ async function main(): Promise<void> {
         ecc: code.ecc,
         border: code.border,
         modules: code.size,
+        segments: code.segments,
+        dataBits: code.dataBits,
+        savedBits: code.savedBits,
       },
       audit,
       ...(scan ? { scan } : {}),

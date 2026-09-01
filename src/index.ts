@@ -1,6 +1,10 @@
 import encodeQR from 'qr'
 import type { QrOpts } from 'qr'
 import { parseHexColor } from './color.js'
+import { describeSingle, encodeOptimized, mightReduceVersion, shouldOptimize, singleFits } from './segments.js'
+import type { SegmentMetadata } from './segments.js'
+
+export type { SegmentMetadata, SegmentMode } from './segments.js'
 
 export type ErrorCorrectionLevel = 'L' | 'M' | 'Q' | 'H'
 export type QRData = string | Uint8Array
@@ -14,6 +18,8 @@ export interface QROptions {
   version?: number
   /** Force a mask from 0 to 7. */
   mask?: number
+  /** Optimize for the smallest version (default), the shortest bitstream, or disable segmentation. */
+  optimize?: 'size' | 'bits' | false
 }
 
 export interface QRCode {
@@ -23,6 +29,9 @@ export interface QRCode {
   readonly border: number
   readonly symbolSize: number
   readonly size: number
+  readonly segments: ReadonlyArray<SegmentMetadata>
+  readonly dataBits: number
+  readonly savedBits: number
 }
 
 export interface SVGOptions {
@@ -123,29 +132,77 @@ export function createQR(data: QRData, options: QROptions = {}): QRCode {
   const mask = options.mask === undefined
     ? undefined
     : integer('mask', options.mask, 0, 7)
+  const optimize = options.optimize ?? 'size'
+  if (optimize !== 'size' && optimize !== 'bits' && optimize !== false)
+    throw new RangeError('optimize must be size, bits, or false')
 
   const text = typeof data === 'string' ? data : ''
   const bytes = typeof data === 'string' ? undefined : data
   if (bytes !== undefined && !isBytes(bytes))
     throw new TypeError('data must be a string or Uint8Array')
 
-  const engineOptions: QrOpts = {
-    ecc: ECC[ecc],
-    border: 1,
-    scale: 1,
-    version,
-    mask,
-    ...(bytes === undefined
-      ? {}
-      : {
-          encoding: 'byte' as const,
-          textEncoder: () => bytes,
-        }),
-  }
+  let symbol: boolean[][]
+  let detectedVersion: number
+  let segments: SegmentMetadata[]
+  let dataBits: number
+  let savedBits: number
+  if (bytes === undefined) {
+    const optimizable = optimize !== false && shouldOptimize(text)
+    const forceOptimized = optimizable
+      && (optimize === 'bits' || !singleFits(text, ECC[ecc], version))
+    if (forceOptimized) {
+      const optimized = encodeOptimized(text, ECC[ecc], version, mask)
+      symbol = optimized.matrix
+      detectedVersion = optimized.version
+      segments = optimized.segments
+      dataBits = optimized.dataBits
+      savedBits = optimized.savedBits
+    }
+    else {
+      const encoded = encodeQR(text, 'raw', {
+        ecc: ECC[ecc],
+        border: 1,
+        scale: 1,
+        version,
+        mask,
+      })
+      symbol = stripEngineBorder(encoded)
+      detectedVersion = (symbol.length - 17) / 4
+      const described = describeSingle(text, detectedVersion)
+      dataBits = described.bits
+      segments = [described.segment]
+      savedBits = 0
 
-  const encoded = encodeQR(text, 'raw', engineOptions)
-  const symbol = stripEngineBorder(encoded)
-  const detectedVersion = (symbol.length - 17) / 4
+      if (optimizable && version === undefined && mightReduceVersion(text, ECC[ecc], detectedVersion)) {
+        const optimized = encodeOptimized(text, ECC[ecc], version, mask)
+        if (optimize === 'bits' || optimized.version < detectedVersion) {
+          symbol = optimized.matrix
+          detectedVersion = optimized.version
+          segments = optimized.segments
+          dataBits = optimized.dataBits
+          savedBits = optimized.savedBits
+        }
+      }
+    }
+  }
+  else {
+    const engineOptions: QrOpts = {
+      ecc: ECC[ecc],
+      border: 1,
+      scale: 1,
+      version,
+      mask,
+      encoding: 'byte',
+      textEncoder: () => bytes,
+    }
+    const encoded = encodeQR(text, 'raw', engineOptions)
+    symbol = stripEngineBorder(encoded)
+    detectedVersion = (symbol.length - 17) / 4
+    const lengthBits = detectedVersion < 10 ? 8 : 16
+    dataBits = 4 + lengthBits + bytes.length * 8
+    segments = [{ mode: 'byte', characters: 0, bytes: bytes.length, bits: dataBits }]
+    savedBits = 0
+  }
   if (!Number.isInteger(detectedVersion) || detectedVersion < 1 || detectedVersion > 40)
     throw new Error(`Encoder returned an invalid ${symbol.length}x${symbol.length} symbol`)
 
@@ -157,6 +214,9 @@ export function createQR(data: QRData, options: QROptions = {}): QRCode {
     border,
     symbolSize: symbol.length,
     size: matrix.length,
+    segments,
+    dataBits,
+    savedBits,
   }
 }
 
@@ -337,5 +397,7 @@ export const capabilities = {
   scannerInputs: ['png'] as const,
   scanProfiles: ['screen', 'print'] as const,
   scannerRuntimes: ['node'] as const,
+  encodingModes: ['numeric', 'alphanumeric', 'byte'] as const,
+  optimization: ['size', 'bits', 'off'] as const,
   runtimes: ['browser', 'node', 'bun', 'deno', 'worker'] as const,
 }

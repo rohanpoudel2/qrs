@@ -13,6 +13,7 @@ function measure(iterations, operation) {
 const samples = [
   { name: 'small', payload: 'hello', iterations: 20_000 },
   { name: 'medium', payload: 'https://example.com/order/123456789', iterations: 10_000 },
+  { name: 'mixed', payload: `abc${'1'.repeat(40)}`, iterations: 5_000 },
   { name: 'large', payload: 'x'.repeat(768), iterations: 500 },
 ]
 const rows = []
