@@ -1,0 +1,50 @@
+name: Feature request
+description: Propose a focused improvement to qrs
+title: "feat: "
+labels: [enhancement, needs-triage]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What workflow is difficult or impossible today?
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed outcome
+      description: Describe user-visible behavior, not only an implementation.
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Can the current API, CLI, or a standard platform feature already solve this?
+
+  - type: dropdown
+    id: surface
+    attributes:
+      label: Primary surface
+      options:
+        - Library API
+        - CLI and agents
+        - Scan audit
+        - Renderer
+        - Documentation
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Checks
+      options:
+        - label: I searched existing issues, discussions, and the roadmap.
+          required: true
+        - label: I can explain why this belongs in the core project.
+          required: true
+

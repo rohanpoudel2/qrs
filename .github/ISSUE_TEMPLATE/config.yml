@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Questions and ideas
+    url: https://github.com/rohanpoudel2/qrs/discussions
+    about: Ask for help or discuss an idea before turning it into a feature request.
+  - name: Security vulnerability
+    url: https://github.com/rohanpoudel2/qrs/security/advisories/new
+    about: Report vulnerabilities privately. Do not open a public issue.
