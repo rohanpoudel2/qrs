@@ -18,6 +18,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Independent `scan-v1` screen and print profiles
 - Resize, blur, JPEG compression, and contrast stress cases
 - Opt-in millisecond timings and performance regression guardrails
+- Deterministic stress coverage across text, binary, QR versions, ECC levels, and concurrent scans
+- Versioned JSON benchmark reports for tracking machine-specific performance over time
 - Differential version testing against `qrcode` across all error-correction levels
 - Drift-free rotating SVG/PNG frames backed by an application token provider
 - Rotation-window, clock-rollback, stale-token, and cancellation handling

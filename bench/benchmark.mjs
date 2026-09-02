@@ -11,6 +11,14 @@ function measure(iterations, operation) {
   return (performance.now() - started) / iterations
 }
 
+function result(operation, iterations, milliseconds) {
+  return {
+    operation,
+    iterations,
+    milliseconds: Math.round(milliseconds * 1_000_000) / 1_000_000,
+  }
+}
+
 const samples = [
   { name: 'small', payload: 'hello', iterations: 20_000 },
   { name: 'medium', payload: 'https://example.com/order/123456789', iterations: 10_000 },
@@ -20,26 +28,45 @@ const samples = [
 const rows = []
 for (const sample of samples) {
   const code = createQR(sample.payload)
-  rows.push({
-    operation: `createQR (${sample.name})`,
-    milliseconds: measure(sample.iterations, () => createQR(sample.payload)),
-  })
-  rows.push({
-    operation: `renderPNG (${sample.name})`,
-    milliseconds: measure(Math.min(sample.iterations, 2_000), () => renderPNG(code)),
-  })
+  rows.push(result(
+    `createQR (${sample.name})`,
+    sample.iterations,
+    measure(sample.iterations, () => createQR(sample.payload)),
+  ))
+  const renderIterations = Math.min(sample.iterations, 2_000)
+  rows.push(result(
+    `renderPNG (${sample.name})`,
+    renderIterations,
+    measure(renderIterations, () => renderPNG(code)),
+  ))
 }
 
 const medium = samples[1]
 const png = renderPNG(createQR(medium.payload))
 const cold = await scanPNG(png, { expected: medium.payload, timings: true })
 const warm = await scanPNG(png, { expected: medium.payload, timings: true })
-rows.push({ operation: 'scan screen (cold)', milliseconds: cold.durationMs })
-rows.push({ operation: 'scan screen (warm)', milliseconds: warm.durationMs })
+rows.push(result('scan screen (cold)', 1, cold.durationMs))
+rows.push(result('scan screen (warm)', 1, warm.durationMs))
 const frameStarted = performance.now()
-for (let i = 0; i < 2_000; i++)
+const frameIterations = 2_000
+for (let i = 0; i < frameIterations; i++)
   await frameAt({ token: () => medium.payload, output: 'png' }, 60_000)
-rows.push({ operation: 'rotating PNG frame', milliseconds: (performance.now() - frameStarted) / 2_000 })
+rows.push(result('rotating PNG frame', frameIterations, (performance.now() - frameStarted) / frameIterations))
 
-console.table(rows)
-console.log(`PNG bytes: ${png.length}`)
+if (process.argv.includes('--json')) {
+  console.log(JSON.stringify({
+    schemaVersion: 1,
+    runtime: {
+      node: process.version,
+      platform: process.platform,
+      architecture: process.arch,
+    },
+    unit: 'milliseconds/op',
+    results: rows,
+    artifacts: { mediumPngBytes: png.length },
+  }))
+}
+else {
+  console.table(rows)
+  console.log(`PNG bytes: ${png.length}`)
+}
