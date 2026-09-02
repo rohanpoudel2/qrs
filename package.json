@@ -43,7 +43,10 @@
     "build": "tsc",
     "typecheck": "tsc --noEmit",
     "test": "npm run build && node --test --test-concurrency=1 test/*.test.mjs",
+    "test:stress": "npm run build && node --test --test-concurrency=1 test/stress.test.mjs",
+    "test:benchmark": "npm run build && node --test --test-concurrency=1 test/performance.test.mjs",
     "benchmark": "npm run build && node bench/benchmark.mjs",
+    "benchmark:json": "npm run build && node bench/benchmark.mjs --json",
     "prepack": "npm test"
   },
   "author": "Rohan Poudel",
